@@ -1,0 +1,139 @@
+{
+  "main": {
+    "id": "8228f97d15c772e4",
+    "type": "split",
+    "children": [
+      {
+        "id": "4559275bb6574cd8",
+        "type": "leaf",
+        "state": {
+          "type": "markdown",
+          "state": {
+            "file": "EFS.md",
+            "mode": "preview",
+            "source": false
+          }
+        }
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "2dfee51a43d44c9e",
+    "type": "split",
+    "children": [
+      {
+        "id": "809091c6dc543c75",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "e227ea75cfe6e143",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {}
+            }
+          },
+          {
+            "id": "62f3d38e6db69957",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "2934dd9c17cbc33c",
+            "type": "leaf",
+            "state": {
+              "type": "starred",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "69f8d405a63ed0e5",
+    "type": "split",
+    "children": [
+      {
+        "id": "f00d0e1989379c82",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "b92e8664e47be8b3",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "EFS.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "b914228a97ed23a6",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "EFS.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "6b7b47b3d4dd07a4",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "844f1ec21d683198",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "EFS.md"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "active": "e227ea75cfe6e143",
+  "lastOpenFiles": [
+    "EBS/ebs-1.md",
+    "S3.md",
+    "CloudWatch.md",
+    "EFS.md",
+    "EC2.md"
+  ]
+}

@@ -41,3 +41,11 @@
 	```
 	git push origin <branch-name>
 	```
+* Merge branch
+	```
+	git merge <branch-name>
+	```
+* Clone repository in local
+	```
+	git clone <repository-url>
+	```

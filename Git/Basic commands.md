@@ -15,7 +15,6 @@
 	```
 	git config --global user.name "Atekur Rahman"
 	git config --global user.email "example@gmail.com"
-	git config --global user.password "password1234"
 	```
 * push an existing repository from the command line
 	```

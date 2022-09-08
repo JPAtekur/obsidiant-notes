@@ -19,3 +19,7 @@
 	```
 	git revert HEAD
 	```
+* Hard rollback to specific commit
+	```
+	git reset <commitId>
+	```

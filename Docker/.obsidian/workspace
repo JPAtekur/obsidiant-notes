@@ -9,7 +9,7 @@
         "state": {
           "type": "markdown",
           "state": {
-            "file": "Commands.md",
+            "file": "Basic Commands.md",
             "mode": "source",
             "source": false
           }
@@ -77,7 +77,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Commands.md",
+                "file": "Basic Commands.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -94,7 +94,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Commands.md",
+                "file": "Basic Commands.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -117,7 +117,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Commands.md"
+                "file": "Basic Commands.md"
               }
             }
           }
@@ -129,5 +129,8 @@
     "collapsed": true
   },
   "active": "30606f58928b7221",
-  "lastOpenFiles": []
+  "lastOpenFiles": [
+    "Info.md",
+    "Basic Commands.md"
+  ]
 }

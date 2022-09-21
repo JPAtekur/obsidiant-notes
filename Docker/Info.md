@@ -9,3 +9,8 @@
 	```
 3.  Log out and log back in so that your group membership is re-evaluated.
 4.  Verify that you can run docker commands without sudo .
+
+### Docker directory in host machine
+```
+	/var/lib/docker
+```

@@ -14,6 +14,14 @@ docker container ls -a
 ```
 docker container ls -l
 ```
+* Show list of running container short id
+```
+docker container ls -q
+```
+* Show list fo all containers short id
+```
+docker container ls -aq
+```
 * Start container
 ```
 docker container start container-name or id
@@ -58,4 +66,46 @@ docker container logs -f con-id
 ### Docker system events
 ```
 docker system events --since 60m
+```
+
+### Stoping and removing container
+* Pause container (use freezer cgroup instead of passing SIGSTOP signal)
+```
+docker container pause con-id
+```
+* Resume container (use freezer cgroup instead of passing SIGCONT signal)
+```
+docker container unpause con-id
+```
+* Stop container (First pass SIGTERM signal, if not sotp then pass SIGKILL signal)
+```
+docker container stop con-id
+```
+* Remove stop container
+```
+docker container rm con-id
+```
+You can't remove running container. If you remove a container first you need to stop and then remove.
+```
+docker container stop con-id
+```
+* Remove all stop containers
+```
+docker container rm $(docker container ls -aq)
+```
+Or
+```
+docker container prune
+```
+* Remove flag
+```
+docker container run --rm image-name
+```
+#### Pass specific signals to container
+```
+docker container kill --signal=signal-number con-id
+```
+* Set container hostname
+```
+docker container run --name=webapp --hostname=webapp ubuntu
 ```

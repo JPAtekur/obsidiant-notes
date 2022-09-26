@@ -1,15 +1,15 @@
 {
   "main": {
-    "id": "358f191e7b2bb55d",
+    "id": "2c7adb30217e6792",
     "type": "split",
     "children": [
       {
-        "id": "30606f58928b7221",
+        "id": "6930ffad86a5e935",
         "type": "leaf",
         "state": {
           "type": "markdown",
           "state": {
-            "file": "Container.md",
+            "file": "Advanced Commands.md",
             "mode": "source",
             "source": false
           }
@@ -19,15 +19,15 @@
     "direction": "vertical"
   },
   "left": {
-    "id": "3db519cfd5d6e8ed",
+    "id": "be37e472ea43d8e3",
     "type": "split",
     "children": [
       {
-        "id": "99fdc4262ddf063f",
+        "id": "0fd9ccb3b34c96b3",
         "type": "tabs",
         "children": [
           {
-            "id": "be29150c9eb6f3f9",
+            "id": "7dce5039db58f2b0",
             "type": "leaf",
             "state": {
               "type": "file-explorer",
@@ -35,7 +35,7 @@
             }
           },
           {
-            "id": "d588edcb82a972b6",
+            "id": "827996f99c2479bb",
             "type": "leaf",
             "state": {
               "type": "search",
@@ -50,7 +50,7 @@
             }
           },
           {
-            "id": "23e87e35abeded7f",
+            "id": "c4f2460a7bb7de27",
             "type": "leaf",
             "state": {
               "type": "starred",
@@ -64,20 +64,20 @@
     "width": 300
   },
   "right": {
-    "id": "9b07b597e2f2c237",
+    "id": "95777f04fee6e2ab",
     "type": "split",
     "children": [
       {
-        "id": "d7d015a7121d6ed0",
+        "id": "fc3c18a3e4181272",
         "type": "tabs",
         "children": [
           {
-            "id": "9a42468752159fb3",
+            "id": "2fd2d2ba98c4e2f5",
             "type": "leaf",
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Container.md",
+                "file": "Advanced Commands.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -89,19 +89,19 @@
             }
           },
           {
-            "id": "19925db036e2eadd",
+            "id": "e605226ddf763682",
             "type": "leaf",
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Container.md",
+                "file": "Advanced Commands.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
             }
           },
           {
-            "id": "b6764fc0541740f4",
+            "id": "47b59b3fd5787538",
             "type": "leaf",
             "state": {
               "type": "tag",
@@ -112,12 +112,12 @@
             }
           },
           {
-            "id": "f1f3eb65d044d426",
+            "id": "712691d40729c077",
             "type": "leaf",
             "state": {
               "type": "outline",
               "state": {
-                "file": "Container.md"
+                "file": "Advanced Commands.md"
               }
             }
           }
@@ -128,13 +128,6 @@
     "width": 300,
     "collapsed": true
   },
-  "active": "30606f58928b7221",
-  "lastOpenFiles": [
-    "Info.md",
-    "Container.md",
-    "Basic Commands.md",
-    "Docker Engine.md",
-    "Container Volume.md",
-    "Important Links.md"
-  ]
+  "active": "6930ffad86a5e935",
+  "lastOpenFiles": []
 }

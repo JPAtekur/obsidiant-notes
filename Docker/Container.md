@@ -109,3 +109,14 @@ docker container kill --signal=signal-number con-id
 ```
 docker container run --name=webapp --hostname=webapp ubuntu
 ```
+
+### Coping contents into container
+Directory must be present in container
+```
+docker container cp host_machine_path container-name:container-path
+```
+
+### Coping contents from container
+```
+docker container cp con-name:con-file-path host-machine-path
+```

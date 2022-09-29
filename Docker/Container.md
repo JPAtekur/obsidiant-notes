@@ -120,3 +120,4 @@ docker container cp host_machine_path container-name:container-path
 ```
 docker container cp con-name:con-file-path host-machine-path
 ```
+We can copy file from stoped container also.

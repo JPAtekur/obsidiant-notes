@@ -9,7 +9,7 @@
         "state": {
           "type": "markdown",
           "state": {
-            "file": "Logging Driver.md",
+            "file": "Images Management.md",
             "mode": "source",
             "source": false
           }
@@ -77,7 +77,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Logging Driver.md",
+                "file": "Images Management.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -94,7 +94,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Logging Driver.md",
+                "file": "Images Management.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -117,7 +117,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Logging Driver.md"
+                "file": "Images Management.md"
               }
             }
           }
@@ -130,6 +130,7 @@
   },
   "active": "30606f58928b7221",
   "lastOpenFiles": [
+    "Logging Driver.md",
     "Troubleshooting docker daemon.md",
     "Container.md",
     "Container Restart Polices.md",

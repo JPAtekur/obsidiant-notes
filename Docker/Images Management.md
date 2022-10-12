@@ -52,3 +52,9 @@ Import local container
 ```
 docker 
 ```
+
+### Contianer commit
+Create an image from a container
+```
+docker container commit -a "Author-name" con-name new-img-name
+```

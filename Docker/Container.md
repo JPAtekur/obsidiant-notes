@@ -77,7 +77,7 @@ docker container pause con-id
 ```
 docker container unpause con-id
 ```
-* Stop container (First pass SIGTERM signal, if not sotp then pass SIGKILL signal)
+* Stop container (First pass SIGTERM signal, if not stop then pass SIGKILL signal)
 ```
 docker container stop con-id
 ```

@@ -9,8 +9,8 @@
         "state": {
           "type": "markdown",
           "state": {
-            "file": "Container.md",
-            "mode": "preview",
+            "file": "Network Deep Dive.md",
+            "mode": "source",
             "source": false
           }
         }
@@ -77,7 +77,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Container.md",
+                "file": "Network Deep Dive.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -94,7 +94,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Container.md",
+                "file": "Network Deep Dive.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -117,7 +117,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Container.md"
+                "file": "Network Deep Dive.md"
               }
             }
           }
@@ -130,15 +130,15 @@
   },
   "active": "30606f58928b7221",
   "lastOpenFiles": [
+    "Docker Network.md",
+    "Docker Engine.md",
+    "Container Volume.md",
     "Basic Commands.md",
     "Build Context.md",
-    "Images Management.md",
-    "Logging Driver.md",
-    "Troubleshooting docker daemon.md",
     "Container.md",
-    "Container Restart Polices.md",
     "Container Ports Mapping.md",
-    "Info.md",
-    "Docker Engine.md"
+    "Container Restart Polices.md",
+    "Images Management.md",
+    "Logging Driver.md"
   ]
 }

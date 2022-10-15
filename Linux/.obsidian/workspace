@@ -9,7 +9,7 @@
         "state": {
           "type": "markdown",
           "state": {
-            "file": "Advanced Commands.md",
+            "file": "Basic/Basic Commands.md",
             "mode": "source",
             "source": false
           }
@@ -77,7 +77,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Advanced Commands.md",
+                "file": "Basic/Basic Commands.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -94,7 +94,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Advanced Commands.md",
+                "file": "Basic/Basic Commands.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -117,7 +117,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Advanced Commands.md"
+                "file": "Basic/Basic Commands.md"
               }
             }
           }
@@ -129,5 +129,8 @@
     "collapsed": true
   },
   "active": "6930ffad86a5e935",
-  "lastOpenFiles": []
+  "lastOpenFiles": [
+    "Basic/Intro.md",
+    "Advanced Commands.md"
+  ]
 }

@@ -1,0 +1,41 @@
+## ElastiCache
+- **In-memory key-value store** with **sub-millisecond latency**
+- Need to provision an underlying EC2 instance
+- Redis -> In-memory data store | Memcached -> **Distributed** memory object cache
+- Read Replicas (for scaling reads & HA)  |   No replication
+- Backup & restore  |  No backup & restore
+- **Single-threaded**  |  **Multi-threaded**
+- **HIPAA compliant** | **Not HIPAA compliant**
+- At rest encryption using KMS
+- In-flight encryption using SSL
+
+## Web Application Firewall (WAF)
+- Protects your application from common **layer 7 web exploits** such as **SQL Injection** and **Cross-Site Scripting (XSS)**
+- - Layer 7 has more data about the structure of the incoming request than layer 4 (used by [AWS Shield](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/AWS%20Shield))
+- Can only be deployed on
+    - [Application Load Balancer](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/Elastic%20Load%20Balancer%20(ELB)#application-load-balancer-alb)
+    - [API Gateway](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/API%20Gateway)
+    - [CloudFront](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/CloudFront)
+-  WAF contains **Web ACL (Access Control List)** containing rules to **filter requests** based on:
+    - **IP addresses**
+    - HTTP headers
+    - HTTP body
+    - URI strings
+    - Size constraints (ex. max 5kb)
+    - **Geo-match** (block countries)
+    - **Rate-based rules** (to count occurrences of events per IP) for **DDoS protection**
+
+## AWS Shield
+### Shield Standard
+- Free service that is activated for every AWS customer
+- Provides protection from **SYN/UDP Floods, Reflection attacks** and other **layer 3 & layer 4 attacks**
+### Shield Advanced
+- **DDoS mitigation** service ($3,000 per month per organization)
+- Protect against more sophisticated attacks on
+    - EC2 instances
+    - Elastic Load Balancing (ELB)
+    - CloudFront
+    - Global Accelerator
+    - Route 53
+- 24/7 access to AWS **DDoS Response (DRP)** team
+- Get reimbursed for usage spikes due to DDoS

@@ -39,3 +39,33 @@
     - Route 53
 - 24/7 access to AWS **DDoS Response (DRP)** team
 - Get reimbursed for usage spikes due to DDoS
+
+## Storage Gateway
+- Bridge between on-premises data and [S3](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/Simple%20Storage%20Service%20(S3)) for **Hybrid Cloud**
+- Not suitable for one-time sync of large amounts of data (use [DataSync](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/DataSync) instead)
+- Optimizes data transfer by sending only changed data
+- **Data is cached at the file gateway** for low latency access
+- Integrated with **Active Directory (AD)** for user authentication
+#### Volume Gateway
+- Uses **iSCSI protocol**
+- Two kinds of volumes:
+    - **Cached volumes**: storage extension using S3 with caching at the volume gateway
+    - **Stored volumes**: entire dataset is on premise, scheduled backups to S3 as **EBS snapshots**
+#### Tape Gateway
+- Used to backup on-premises data using tape-based process to S3 as Virtual Tapes
+- Uses **iSCSI protocol**
+#### FSx File Gateway
+- Windows native compatibility (SMB, NTFS, Active Directory)
+- **Data is cached at the file gateway** for low latency access
+
+## Route 53
+* AWS managed **Authoritative DNS**
+* Affected by client's DNS caching (not suitable for [Blue-Green Deployment](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/Blue-Green%20Deployment) if the client caches DNS queries)
+#### Hosted Zone
+- **Public Hosted Zone**
+    - resolves public domain names
+    - can be queried by anyone on the internet
+- **Private Hosted Zone**
+    - resolves private domain names
+    - can only be queried from within the VPC
+- 

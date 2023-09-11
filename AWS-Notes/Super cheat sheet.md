@@ -78,7 +78,7 @@
 	- **Does not work for ONEZONE_IA & GLACIER**
 - - SSE-KMS may create bottleneck in S3 performance
 - **Byte-range fetches**
-	- - - Parallelize download requests by fetching specific byte ranges in each request
+	- Parallelize download requests by fetching specific byte ranges in each request
 	- Better resilience in case of failures since we only need to refetch the failed byte range and not the whole file
 - **S3 Transfer Acceleration**
     - Speed up **upload and download** for **large objects (>1GB)** for **global users**
@@ -107,3 +107,87 @@
 - To capture data modification events, use **native functions** or **stored procedures** to invoke a **Lambda** function.
 - Any database engine level upgrade for an RDS DB instance with Multi-AZ deployment triggers both the primary and standby DB instances to be upgraded at the same time. This causes **downtime** until the upgrade is complete. This is why it should be done during the maintenance window.
 
+### Aurora
+- Auto-scaling (max 128TB)
+- **Backtrack**: restore data at any point of time without taking backups
+- Endpoints
+	- **Writer Endpoint** (Cluster Endpoint)
+	- **Reader Endpoint**
+	- **Custom Endpoint**
+		- Used to point to a subset of replicas
+- **Automated failover**
+	- A read replica is promoted as the new master in less than 30 seconds
+	- In case **no replica** is available, Aurora will attempt to **create a new DB Instance** in the **same AZ** as the original instance. This replacement of the original instance is done on a **best-effort basis** and may not succeed.
+- - Aurora maintains 6 copies of your data across 3 AZ:
+    - 4 copies out of 6 needed for writes (can still write if 1 AZ completely fails)
+    - 3 copies out of 6 need for reads
+- Each Read Replica is associated with a priority tier (0-15). In the event of a failover, Amazon Aurora will promote the Read Replica that has the highest priority (lowest tier). If two or more Aurora Replicas share the same tier, then Aurora promotes the replica that is largest in size. If two or more Aurora Replicas share the same priority and size, then Aurora promotes an arbitrary replica in the same promotion tier.
+- EC2 instances should access the DB using [IAM DB Authentication] but they can also do it using credentials fetched from the [SSM Parameter Store]
+-  Aurora Serverless
+	- Automated database instantiation and auto scaling based on usage
+- Aurora Multi-Master
+	- Every node (replica) in the cluster can read and write
+	- Used for immediate failover for write node (high availability in terms of write). If disabled and the master node fails, need to promote a Read Replica as the new master (will take some time).
+	- **Client needs to have multiple DB connections for failover**
+- Aurora Global Database
+	- Entire database is replicated across regions to recover from region failure
+	- Up to 5 secondary (read-only) regions (replication lag < 1 second)
+	- Up to 16 Read Replicas per secondary region
+	- **RTO of less than 1 minute** (to promote another region as primary)
+- Aurora Events
+	- Invoke a **Lambda** function from an **Aurora MySQL-compatible DB cluster** with a **native function** or a **stored procedure** (same as [RDS](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/Relational%20Database%20Service%20(RDS)#rds-events))
+
+### DynamoDB
+- **Maximum size of an item: 400 KB**
+- - Supports TTL (automatically delete an item after an expiry timestamp)
+- **Provisioned Mode** (default)
+	- - Provision read & write capacity
+	- - Auto-scaling option (eg. set RCU and WCU to 80% and the capacities will be scaled automatically based on the workload)
+- **On-demand Mode**
+	- - Capacity auto-scaling based on the workload
+- DynamoDB Accelerator (DAX)
+	- - Caches the queries and scans of DynamoDB items
+	- - Solves read congestion (`ProvisionedThroughputExceededException`)
+	- - 5 minutes TTL for cache (default)
+* DynamoDB Streams
+	* - Ordered stream of notifications of item-level modifications (create/update/delete) in a table
+	- Destination can be
+	    - Kinesis Data Streams
+	    - AWS Lambda
+	    - Kinesis Client Library applications
+	- Data Retention for up to 24 hours
+- Global Tables
+	- - **Must enable DynamoDB Streams as a pre-requisite**
+
+### ElastiCache
+- **In-memory key-value store** with **sub-millisecond latency**
+- Redis -> In-memory data store | Memcached -> **Distributed** memory object cache
+	- Read Replicas (for scaling reads & HA)  |   No replication
+	- Backup & restore  |  No backup & restore
+	- **Single-threaded**  |  **Multi-threaded**
+	- **HIPAA compliant** | **Not HIPAA compliant**
+	- Multi-AZ support with automatic failover (disaster recovery) | -
+- - Network security is managed using **Security Groups** (only allow EC2 security group for incoming requests)
+
+### FSx
+- Allows us to launch **3rd party high-performance file systems** on AWS
+- **Can be accessed from your on-premise infrastructure**
+- FSx for Windows
+	- - Supports **SMB** protocol, Windows **NTFS**, Microsoft **Active Directory** integration, ACLs, user quotas
+	- - Data is backed-up daily to S3
+	- - **Does not integrate with S3** (cannot store cold data)
+- FSx for Lustre
+	- **Seamless integration with S3**
+	    - Can read S3 buckets as a file system (through FSx)
+	    - Can write the output back to S3 (through FSx)
+- FSx Deployment Options
+	- **Scratch File System**
+	    - Temporary storage (cheaper)
+	    - Data is not replicated (data lost if the file server fails)
+	    - High burst (6x faster than persistent file system)
+	    - Usage: short-term processing
+	- **Persistent File System**
+	    - Long-term storage (expensive)
+	    - Data is replicated within same AZ
+	    - Failed files are replaced within minutes
+	    - Usage: long-term processing, sensitive data

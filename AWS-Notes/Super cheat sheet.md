@@ -191,3 +191,123 @@
 	    - Data is replicated within same AZ
 	    - Failed files are replaced within minutes
 	    - Usage: long-term processing, sensitive data
+
+### Redshift
+- Based on **PostgreSQL**
+- Used for **Online Analytical Processing (OLAP)** and high performance querying
+- **Columnar storage** of data with **massively parallel query execution** in **SQL**
+- Need to provision instances as a part of the Redshift cluster (pay for the instances provisioned)
+- **No multi-AZ support** (all the nodes will be in the same AZ)
+- Auto-healing feature
+- Loading data into Redshift
+	- Use **COPY command** to load data from an S3 bucket into Redshift
+	- **Kinesis Data Firehose**
+	    - **Sends data to S3** and issues a **COPY** command to load it into Redshift
+	- **EC2 Instance**
+		- Using **JDBC driver**
+- Snapshots
+	- Stored internally in **S3**
+	- **Incremental** (only changes are saved)
+	- Can be restored into a new Redshift cluster
+	- Automated
+	    - based on a schedule or storage size (every 5 GB)
+	    - set retention
+	- Manual
+	    - retains until you delete them
+	- Feature to **automatically copy snapshots into another region**
+- Redshift Spectrum
+	- Query data present in S3 without loading it into Redshift
+	- Need to have a Redshift cluster to use this feature
+	- Query is executed by 1000s of Redshift Spectrum nodes
+
+### Neptune
+- AWS managed **graph database**
+- Used for **high relationship data** (eg. social networking)
+- Highly available across **3 AZ** with up to **15 read replicas**
+- **Point-in-time recovery** due to continuous backup to S3
+- Support for KMS encryption at rest + HTTPS for in-flight encryption
+- **Need to provision nodes in advance** (pay for the provisioned nodes)
+
+### ElasticSearch
+- Used in combination with a database to perform **search operations on the database**
+- Can search on any field, even supports **partial matches**
+- **Need to provision a cluster of instances** (pay for provisioned instances)
+- Supports **Multi-AZ**
+- Used in Big Data
+- Comes with **Kibana** (visualization) & **Logstash** (log ingestion) - **ELK stack**
+- Integrated with [Cognito](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/Cognito) for access control
+
+### Snow Family
+- **Takes around 2 weeks to transfer the data**
+- **Snowball cannot import to Glacier directly** (transfer to S3, configure a lifecycle policy to transition the data into Glacier)
+* ***Snowcone**
+	- 2 CPUs, **4GB RAM**, wired or wireless access
+	- 8 TB storage
+	- **DataSync Agent** is preinstalled
+	- Does not support **Storage Clustering**
+- **Snowball Edge**
+	- **Compute Optimized**
+	    - 52 vCPUs, 208 GB of RAM
+	    - 42 TB storage
+	    - **Optional GPU** (useful for video processing or machine learning)
+	    - Supports **Storage Clustering**
+	- **Storage Optimized**
+	    - Up to 40 CPUs, 80 GB of RAM
+	    - 80 TB storage
+	    - Supports **Storage Clustering** (up to 15 nodes)
+	    - Transfer up to petabytes
+* ***Snowmobile**
+    - 100 PB storage
+    - Used when transferring **> 10PB**
+    - Transfer up to exabytes
+    - Does not support **Storage Clustering**
+- Devices for edge computing
+    - Snowcone
+    - Snowball Edge
+- Can run **EC2 Instances & AWS Lambda functions locally on Snow device** (using **AWS loT Greengrass**)
+
+### Database Migration Service (DMS)
+- The source database remains available during migration
+- **Continuous Data Replication** using **CDC (change data capture)**
+- Requires **EC2 instance running the DMS software** to perform the replication tasks. If the amount of data is large, use a large instance. If multi-AZ is enabled, need an instance in each AZ.
+- Migrating using Snow Family
+	1. Use the Schema Conversion Tool (SCT) to extract the data locally and move it to the Edge device
+	2. Ship the Edge device or devices back to AWS
+	3. After AWS receives your shipment, the Edge device automatically loads its data into an Amazon S3 bucket.
+	4. AWS DMS takes the files and migrates the data to the target data store (eg. DynamoDB)
+
+### Storage Gateway
+* S3 File Gateway
+	- Used to expand on-premise NFS by leveraging S3
+	- Configured S3 buckets are accessible on premises using the **NFS** and **SMB** protocol
+	- **Data is cached at the file gateway** for low latency access
+	- Can be mounted on many servers on-premises
+	- Integrated with **Active Directory (AD)** for user authentication
+* Volume Gateway
+	- Used for on-premise storage volumes
+	- Uses **iSCSI protocol**
+	- Two kinds of volumes:
+	    - **Cached volumes**: storage extension using S3 with caching at the volume gateway
+	    - **Stored volumes**: entire dataset is on premise, scheduled backups to S3 as **EBS snapshots**
+- Tape Gateway
+	- Used to backup on-premises data using tape-based process to S3 as Virtual Tapes
+	- Uses **iSCSI protocol**
+- FSx File Gateway
+	- Used to expand on-premise Windows-based storage by leveraging FSx for Windows
+
+### DataSync
+- Move **large amounts of data** from your **on-premises NAS or file system** via **NFS** or **SMB** protocol to AWS over the **public internet using TLS**
+- Can synchronize to:
+    - S3 (all storage classes)
+    - EFS
+    - FSx for Windows
+- **Scheduled Replication** (not continuous)
+* Can also be used to transfer between two EFS in different regions
+- Suitable in automating and accelerating online data transfers to a variety of AWS storage services (over [Storage Gateway](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/Storage%20Gateway) which only works with S3)
+* Perfect to move large amounts of historical data from on-premises to S3 Glacier Deep Archive (directly).
+
+### AppSync
+- Store and **sync data across mobile and web apps** in **real-time**
+- Makes use of **GraphQL** (mobile technology from Facebook)
+- **Offline data synchronization** (replaces Cognito Sync)
+

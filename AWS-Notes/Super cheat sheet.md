@@ -312,3 +312,60 @@
 - Makes use of **GraphQL** (mobile technology from Facebook)
 - **Offline data synchronization** (replaces Cognito Sync)
 
+### Route 53
+- Affected by client's DNS caching (not suitable for [Blue-Green Deployment](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/Blue-Green%20Deployment) if the client caches DNS queries)
+* Hosted Zone
+	- A container for DNS records that define how to route traffic to a domain and its subdomains.
+* Record Types
+* A - maps a hostname to IPv4
+* AAAA - maps a hostname to IPv6
+* CNAME - maps a hostname to another hostname
+	* The target is a domain name which must have an A or AAAA record
+	- **Cannot point to root domains (Zone Apex)** Ex: you can’t create a CNAME record for `example.com`, but you can create for `something.example.com`
+- **Alias** - maps a hostname to an AWS resource
+	- Can point to root (zone apex) and non-root domains
+	- **Alias Record is of type A or AAAA** (IPv4 / IPv6)
+	- Targets can be
+	    - Elastic Load Balancers
+	    - CloudFront Distributions
+	    - API Gateway
+	    - Elastic Beanstalk environments
+	    - S3 Websites
+	    - VPC Interface Endpoints
+	    - Global Accelerator accelerator
+	    - Route 53 record in the same hosted zone
+	- **Target cannot be EC2**
+- Routing Policies
+* Simple
+	- Route to one or more resources
+	- If multiple values are returned, client chooses one at random (client-side load balancing)
+	- No health check (if returning multiple resources, some of them might be unhealthy)
+* Weighted
+	- Route a fraction of request to multiple resources
+	- Use case: testing a new application version by sending a small amount of traffic
+	- Can be used for **Active-Active failover** strategy
+- Latency-based
+	- Redirect to the resource that has the lowest latency
+	- Health checks
+	- Can be used for **Active-Active failover** strategy
+* Failover
+	- Primary & Secondary Records (if the primary application is down, route to secondary application)
+	- Health check must be associated with the primary record
+	- Used for **Active-Passive failover** strategy
+* Geolocation
+	- Routing based on the client's location
+	- Should create a “Default” record (in case there’s no match on location)
+	- Use cases: restrict content distribution & language preference
+- Geoproximity
+	- Route traffic to your resources based on the proximity of clients to the resources
+	- Ability to shift more traffic to resources based on the defined bias.
+	    - To expand (bias: 1 to 99) → more traffic to the resource
+	    - To shrink (bias: -1 to-99) → less traffic to the resource
+	- Resources can be:
+	    - AWS resources (specify AWS region)
+	    - Non-AWS resources (specify Latitude and Longitude)
+	- Uses **Route 53 Traffic Flow**
+- Multi-value
+	- Route traffic to multiple resources (max 8)
+	- Health Checks (only healthy resources will be returned)
+- 

@@ -368,4 +368,347 @@
 - Multi-value
 	- Route traffic to multiple resources (max 8)
 	- Health Checks (only healthy resources will be returned)
-- 
+
+### API Gateway
+- Serverless REST APIs
+- Invoke Lambda functions using REST APIs (API gateway will proxy the request to lambda)
+- Supports **WebSocket** (stateful)
+- Cache API responses
+- Transform and validate requests and responses
+* We can use an API Gateway REST API to directly access a DynamoDB table by creating a proxy for the DynamoDB query API
+* Endpoint Types
+	- **Edge-Optimized** (default)
+	    - For global clients
+	    - Requests are routed through the [CloudFront](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/CloudFront) edge locations (improves latency)
+	    - The API Gateway lives in only one region but it is accessible efficiently through edge locations
+	- **Regional**
+	    - For clients within the same region
+	    - Could manually combine with your own CloudFront distribution for global deployment (this way you will have more control over the caching strategies and the distribution)
+	- **Private**
+	    - Can only be accessed within your VPC using an **Interface VPC endpoint** (ENI)
+	    - Use resource policy to define access
+- Access Management
+	* IAM Policy
+		- Create an IAM policy and attach to User or Role to allow it to call an API
+		- Good to provide **access within your own AWS account**
+		- Leverages **Sig v4** where lAM credential are in the request headers
+	- Lambda Authorizer
+		- Uses a Lambda function to validate the token being passed in the header and return an lAM policy to determine if the user should be allowed to access the resource.
+		- Option to **cache result of authentication**
+		- For **OAuth / SAML / 3rd party type of authentication**
+		- Good to provide access outside your AWS account if you have an **existing IDP**
+	- Cognito User Pools (CUP)
+		- **Seamless integration with CUP** (no custom lambda implementation required)
+		- **Only supports authentication** (authorization must be implemented in the backend)
+		- The client (user) first authenticates with Cognito and gets the access token which it passes in the header to API gateway. API gateway validates the token using Cognito and then hits the backend if the token is valid.
+
+# Virtual Private Cloud (VPC)[¶](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/virtual%20private%20cloud%20(vpc)/#virtual-private-cloud-vpc "Permanent link")
+
+- **Regional resource**
+- Soft limit of 5 VPCs per region
+- Only the Private IPv4 ranges are allowed
+
+> New EC2 instances are launched into the default VPC if no subnet is specified
+
+## Classless Inter-Domain Routing (CIDR)[¶](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/virtual%20private%20cloud%20(vpc)/#classless-inter-domain-routing-cidr "Permanent link")
+
+- Way to define a range of IP addresses
+    - ![attachments/Pasted image 20220512094258.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220512094258.jpg)
+- Two parts
+    - Base IP - 192.168.0.0
+    - Subnet Mask (defines how many bits are frozen from the left side) - /16
+- Private IP ranges:
+    - 10.0.0.0 - 10.255.255.255 (10.0.0.0/8) ⇒ used in big networks (24 bits can change)
+    - 172.16.0.0 - 172.31.255.255 (172.16.0.0/12) ⇒ AWS default VPC
+    - 192.168.0.0 - 192.168.255.255 (192.168.0.0/16) ⇒ home networks
+- Rest of the IP ranges are Public
+- **Max 5 CIDR ver VPC**
+    - Min. size is /28 (16 IP addresses)
+    - Max. size is /16 (65536 IP addresses)
+
+## Subnets[¶](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/virtual%20private%20cloud%20(vpc)/#subnets "Permanent link")
+
+- Sub-ranges of IP addresses within the VPC
+- **Each subnet is bound to an AZ**
+- Subnets in a VPC cannot have overlapping CIDRs
+- **Default VPC only has public subnets** (1 public subnet per AZ, no private subnet)
+- **AWS reserves 5 IP addresses (first 4 & last 1) in each subnet**. These 5 IP addresses are not available for use. Example: if CIDR block 10.0.0.0/24, then reserved IP addresses are 10.0.0.0, 10.0.0.1, 10.0.0.2, 10.0.0.3 & 10.0.0.255
+
+> To make the EC2 instances running in private subnets accessible on the internet, place them behind an internet-facing (running in public subnets) Elastic Load Balancer.
+> 
+> **There is no concept of Public and Private subnets.** Public subnets are subnets that have: - “Auto-assign public IPv4 address” set to “Yes” - The subnet route table has an attached Internet Gateway
+> 
+> This allows the resources within the subnet to make requests that go to the public internet. **A subnet is private by default.**
+> 
+> Since the resources in a private subnet don't have public IPs, they need a NAT gateway for address translation to be able to make requests that go to the public internet. NAT gateway also prevents these private resources from being accessed from the internet.
+
+## Internet Gateway (IGW)[¶](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/virtual%20private%20cloud%20(vpc)/#internet-gateway-igw "Permanent link")
+
+- Allows resources in a VPC to connect to the Internet
+    - ![attachments/Pasted image 20220512100002.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220512100002.jpg)
+- **Attached to the VPC**
+- Should be used to **connect public resources to the internet** (use NAT gateway for private resources since they need network address translation)
+- Route table of the public subnets must be edited to allow requests destined outside the VPC to be routed to the IGW
+    - ![attachments/Pasted image 20220512222218.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220512222218.jpg)
+
+> IGW performs network address translation (NAT) for a public EC2 instance
+
+## Bastion Hosts[¶](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/virtual%20private%20cloud%20(vpc)/#bastion-hosts "Permanent link")
+
+- A EC2 instance running in the public subnet (accessible from public internet), to allow users to SSH into the instances in the private subnet.
+    - ![attachments/Pasted image 20220512100455.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220512100455.jpg)
+- Security groups of the private instances should only allow traffic from the bastion host.
+- Bastion host should only allow port 22 traffic from the IP address you need (**small instances are enough**)
+
+#### High Availability[¶](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/virtual%20private%20cloud%20(vpc)/#high-availability "Permanent link")
+
+- HA options for Bastion Host
+    - Run 2 Bastion Hosts across 2 AZ
+    - Run 1 Bastion Host across 2 AZ with ASG 1:1:1
+- Routing to the bastion host
+    - If 1 bastion host, use an elastic IP with EC2 user-data script to access it
+    - If 2 bastion hosts, use a public-facing NLB (layer 4) deployed in multiple AZ. Bastion hosts can live in the private subnet (more secure)
+- Can’t use ALB as it works in layer 7 (HTTP protocol) and SSH works with TCP
+- Diagram
+    - ![attachments/Pasted image 20220513222559.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220513222559.jpg)
+
+## Network Address Translation (NAT) Instance[¶](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/virtual%20private%20cloud%20(vpc)/#network-address-translation-nat-instance "Permanent link")
+
+- An [EC2](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/Elastic%20Compute%20Cloud%20(EC2)) instance **launched in the public subnet** which performs network address translation to enable private instances to use the public IP of the NAT instance to access the internet. This is exactly the same as how routers perform NAT. This also prevents the private instances from being accessed from the public internet.
+    - ![attachments/Pasted image 20220512101152.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220512101152.jpg)
+- **Must disable EC2 setting: source / destination IP check on the NAT instance** as the IPs can change.
+- **Must have an Elastic IP attached to it**
+- Route Tables for private subnets must be configured to route internet-destined traffic to the NAT instance (its elastic IP)
+- **Can be used as a Bastion Host**
+- Disadvantages
+    - Not highly available or resilient out of the box. Need to create an ASG in multi-AZ + resilient user-data script
+    - Internet traffic bandwidth depends on EC2 instance type
+    - You must manage [Security Groups](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/Elastic%20Compute%20Cloud%20(EC2)#security-groups) & rules:
+        - Inbound:
+            - Allow HTTP / HTTPS traffic coming from Private Subnets
+            - Allow SSH from your home network (access is provided through Internet Gateway)
+        - Outbound:
+            - Allow HTTP / HTTPS traffic to the Internet
+- Architecture
+    - ![attachments/Pasted image 20220512101803.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220512101803.jpg)
+
+## NAT Gateway[¶](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/virtual%20private%20cloud%20(vpc)/#nat-gateway "Permanent link")
+
+- AWS managed NAT with **bandwidth autoscaling** (up to 45Gbps)
+- Preferred over NAT instances
+- **Uses an Elastic IP** and Internet Gateway behind the scenes
+- **Created in a public subnet**
+- **Bound to an AZ**
+- **Cannot be used by EC2 instances in the same subnet** (only from other subnets)
+- **Cannot be used as a Bastion Host**
+- Route Tables for private subnets must be configured to route internet-destined traffic to the NAT gateway
+    - ![attachments/Pasted image 20220512222148.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220512222148.jpg)
+- No Security Groups to manage
+- Pay per hour
+- Architecture
+    - ![attachments/Pasted image 20220512204306.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220512204306.jpg)
+- High Availability
+    - Create NAT gateways in public subnets bound to different AZ all routing outbound connections to the IGW (attached to the VPC)
+    - No cross-AZ failover needed because if an AZ goes down, all of the instances in that AZ also go down.
+    - ![attachments/Pasted image 20220512204520.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220512204520.jpg)
+
+## DNS Resolution in VPC[¶](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/virtual%20private%20cloud%20(vpc)/#dns-resolution-in-vpc "Permanent link")
+
+- Two settings need to be enabled to allow DNS resolution within a VPC:
+    - **DNS Support** (enableDnsSupport)
+        - Allows the resources within the VPC to query the DNS provided by Route 53 Resolver
+        - **Enabled by default**
+        - If disabled, we need to provide a custom DNS server otherwise we won’t be able to reach hostnames
+        - Diagram
+            - ![attachments/Pasted image 20220512210247.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220512210247.jpg)
+    - **DNS Hostnames** (enableDnsHostnames)
+        - Assigns **public hostname** to EC2 instances in our VPC if they have a public IPv4
+        - **Doesn't work until `enableDnsSupport=true`**
+        - By default
+            - Default VPC - Enabled
+            - Custom VPC - Disabled
+        - When disabled, instances in the VPC will have a public IP but no public DNS
+- If you use custom domain names in a Private Hosted Zone in Route 53, you must enable both of these settings
+    - ![attachments/Pasted image 20220512210613.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220512210613.jpg)
+
+## Network Access Control List (NACL)[¶](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/virtual%20private%20cloud%20(vpc)/#network-access-control-list-nacl "Permanent link")
+
+- NACL is a firewall at the subnet level
+- One NACL per subnet but a NACL can be attached to multiple subnets
+- **New subnets are assigned the Default NACL**
+- **Default NACL allows all inbound & outbound requests**
+    - ![attachments/Pasted image 20220512215745.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220512215745.jpg)
+- NACL Rules
+    - Based only on IP addresses
+    - Rules number: 1-32766 (lower number has higher precedence)
+    - First rule match will drive the decision
+    - The last rule denies the request (only when no previous rule matches)
+- NACL vs [Security Group](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/Elastic%20Compute%20Cloud%20(EC2)#security-groups)
+    - NACL
+        - Firewall for subnets
+        - Supports both Allow and Deny rules
+        - Stateless (both request and response will be evaluated against the NACL rules)
+        - Only the first matched rule is considered
+    - Security Group:
+        - Firewall for EC2 instances
+        - Supports only Allow rules
+        - Stateful (only request will be evaluated against the SG rules)
+        - All rules are evaluated
+    - ![attachments/Pasted image 20220512220220.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220512220220.jpg)
+- NACL with Ephemeral Ports
+    - In the example below, the client EC2 instance needs to connect to DB instance. Since the ephemeral port can be randomly assigned from a range of ports, the Web Subnets’s NACL must allow inbound traffic from that range of ports and similarly DB Subnet’s NACL must allow outbound traffic on the same range of ports.
+    - ![attachments/Pasted image 20220512220647.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220512220647.jpg)
+
+## VPC Peering[¶](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/virtual%20private%20cloud%20(vpc)/#vpc-peering "Permanent link")
+
+- Connect two VPCs (could be in **different region or account**) using the AWS private network
+    - ![attachments/Pasted image 20220512221728.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220512221728.jpg)
+- Participating VPCs must have **non-overlapping CIDR**
+- VPC Peering connection is **non-transitive** (A - B, B - C != A - C) because it works based on route-table rules.
+- Must update route tables in each VPC’s subnets to ensure requests destined to the peered VPC can be routed through the peering connection
+    - ![attachments/Pasted image 20220512221946.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220512221946.jpg)
+    - ![attachments/Pasted image 20220512221954.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220512221954.jpg)
+- You can reference a security group in a peered VPC across account or region. This allows us to use SG instead of CIDR when configuring rules.
+
+> VPC Peering does not facilitate centrally-managed VPC like [VPC Sharing](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/Resource%20Access%20Manager%20(RAM)#vpc-sharing)
+
+## VPC Endpoints[¶](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/virtual%20private%20cloud%20(vpc)/#vpc-endpoints "Permanent link")
+
+- **Private endpoints** within your VPC that allow AWS services to privately connect to resources within your VPC without traversing the public internet (cheaper)
+    - ![attachments/Pasted image 20220512222517.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220512222517.jpg)
+- Powered by **AWS PrivateLink**
+- **Route table is updated automatically**
+- **Bound to a region** (do not support inter-region communication)
+- Two types:
+    - **Interface Endpoint**
+        - Provisions an **ENI** (private IP) as an entry point per subnet
+        - Need to **attach a security group to the interface endpoint** to control access
+        - Supports most AWS services
+    - **Gateway Endpoint**
+        - Provisions a gateway
+        - Must be used as a target in a route table
+        - Supports only **S3** and **DynamoDB**
+
+## VPC Flow Logs[¶](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/virtual%20private%20cloud%20(vpc)/#vpc-flow-logs "Permanent link")
+
+- Captures information about **IP traffic** going into your **interfaces**
+- Three levels:
+    - **VPC** Flow Logs
+    - **Subnet** Flow Logs
+    - **ENI** Flow Logs
+- Can be configured to show accepted, rejected or all traffic
+- Flow logs data can be sent to **S3** (bulk analytics) or **CloudWatch Logs** (near real-time decision making)
+- Query VPC flow logs using **Athena** in S3 or **CloudWatch Logs Insights**
+
+## IPv6 Support[¶](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/virtual%20private%20cloud%20(vpc)/#ipv6-support "Permanent link")
+
+- IPv4 cannot be disabled for your VPC
+- Enable IPv6 to operate in **dual-stack mode** in which your EC2 instances will get at least a **private IPv4** and a **public IPv6**. They can communicate using either IPv4 or IPv6 to the internet through an Internet Gateway.
+    - ![attachments/Pasted image 20220513005218.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220513005218.jpg)
+- If you cannot launch an EC2 instance in your subnet, It’s not because it cannot acquire an IPv6 (the space is very large). It’s because there are no available IPv4 in your subnet. **Solution: Create a larger IPv4 CIDR for the subnet**
+
+#### Egress-only Internet Gateway[¶](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/virtual%20private%20cloud%20(vpc)/#egress-only-internet-gateway "Permanent link")
+
+- Allows instances in your VPC to initiate outbound connections over IPv6 while preventing inbound IPv6 connections to your private instances.
+    - ![attachments/Pasted image 20220513005755.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220513005755.jpg)
+- Similar to [NAT Gateway](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/Virtual%20Private%20Cloud%20(VPC)#nat-gateway) but for IPv6
+- Must update Route Tables
+
+## VPC Console Wizard[¶](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/virtual%20private%20cloud%20(vpc)/#vpc-console-wizard "Permanent link")
+
+> - Supported Configurations:
+> - VPC with a single public subnet
+> - VPC with public and private subnets (NAT)
+> - VPC with public and private subnets and AWS Site-to-Site VPN access
+> - VPC with a private subnet only and AWS Site-to-Site VPN access
+
+### PrivateLink
+- Used to expose **services** in one VPC to multiple other VPCs, possibly in **different accounts**
+- Should not use VPC peering as we only want to expose a few services
+- Requires a **NLB (common) or GWLB in the service VPC** and **ENI in the consumer VPC**
+- Use multi-AZ NLB and ENIs in multiple AZ for fault-tolerance
+
+![attachments/Pasted image 20220512235655.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220512235655.jpg)
+
+## Exposing ECS tasks[¶](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/privatelink/#exposing-ecs-tasks "Permanent link")
+
+- ECS tasks require an ALB. So, we can connect the ALB to the NLB for PrivateLink.
+- Corporate Data Centers will still connect through the VPN or Direct Connect.
+
+![attachments/Pasted image 20220513000308.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220513000308.jpg)
+
+
+### Site-to-Site VPN
+- Easiest and most cost-effective way to connect a VPC to an on-premise data center
+- **IPSec Encrypted** connection through the public internet
+- **Virtual Private Gateway (VGW)**: VPN concentrator on the VPC side of the VPN connection
+- **Customer Gateway (CGW)**: Software application or physical device on customer side of the VPN connection
+- If you need to ping EC2 instances from on-premises, make sure you add the **ICMP protocol** on the inbound rules of your security groups
+* VPN CloudHub
+	- **Low-cost hub-and-spoke model** for **network connectivity between a VPC and multiple on-premise data centers**
+	- Every participating network can communicate with one another through the VPN connection
+
+# Direct Connect (DX)[¶](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/direct%20connect%20(dx)/#direct-connect-dx "Permanent link")
+
+- Dedicated private connection from an on-premise data center to a VPC
+    - ![attachments/Pasted image 20220512233459.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220512233459.jpg)
+- **Data in transit is not-encrypted** but the connection is private (secure)
+- More stable and secure than Site-to-Site VPN
+- Access public & private resources on the same connection using **Public & Private Virtual Interface (VIF)** respectively
+- Connection to a data center is made from a **Direct Connect Location**
+- Connects to a Virtual Private Gateway (VGW) on the VPC end
+- Supports both IPv4 and IPv6
+- Supports **Hybrid Environments** (on premises + cloud)
+- **Lead time > 1 month**
+
+## Connection Types[¶](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/direct%20connect%20(dx)/#connection-types "Permanent link")
+
+- **Dedicated Connection**
+    - **1 Gbps and 10 Gbps** (fixed capacity)
+    - Physical ethernet port dedicated to a customer
+- **Hosted Connection**
+    - **50Mbps, 500 Mbps, up to 10 Gbps**
+    - **On-demand capacity scaling** (more flexible than dedicated connection)
+
+## Encryption[¶](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/direct%20connect%20(dx)/#encryption "Permanent link")
+
+- For encryption in flight, use AWS Direct Connect + VPN which provides an **IPsec-encrypted private connection**
+    - ![attachments/Pasted image 20220512234026.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220512234026.jpg)
+- Good for an extra level of security
+
+## Resiliency[¶](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/direct%20connect%20(dx)/#resiliency "Permanent link")
+
+- **Best way** (redundant direct connect connections)
+    - ![attachments/Pasted image 20220512234246.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220512234246.jpg)
+- **Cost-effective way** (VPN connection as a backup)
+    - Implement an **IPSec VPN** connection and use the **same BGP prefix**. Both the Direct Connect connection and IPSec VPN are active and being advertised using the Border Gateway Protocol (BGP). The **Direct Connect link will always be preferred** unless it is unavailable.
+
+## Direct Connect Gateway[¶](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/direct%20connect%20(dx)/#direct-connect-gateway "Permanent link")
+
+- Used to setup a Direct Connect to multiple VPCs, possibly in **different regions** but **same account**
+- Using DX, we will create a Private VIF to the Direct Connect Gateway which will extend the VIF to Virtual Private Gateways in multiple VPCs (possibly across regions).
+    - ![attachments/Pasted image 20220512234818.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220512234818.jpg)
+
+# Transit Gateway[¶](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/transit%20gateway/#transit-gateway "Permanent link")
+
+- **Transitive peering** between thousands of VPCs and on-premise data centers using **hub-and-spoke (star) topology**
+- Works with **Direct Connect Gateway**, **VPN Connection** and **VPC**
+- **Bound to a region**
+- Transitive peering between VPCs in **same region & account**
+- **Route Tables** to control communication within the transitive network
+- Supports **IP Multicast** (not supported by any other AWS service)
+- Diagram
+    - ![attachments/Pasted image 20220513002130.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220513002130.jpg)
+
+## Increasing BW of Site-to-Site VPN connection[¶](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/transit%20gateway/#increasing-bw-of-site-to-site-vpn-connection "Permanent link")
+
+- **ECMP** (equal-cost multi-path) routing is a routing strategy to allow to forward a packet over multiple best path
+- To increase the bandwidth of the connection between Transit Gateway and corporate data center, create multiple site-to-site VPN connections, each with 2 tunnels (2 x 1.25 = 2.5 Gbps per VPN connection).
+    - ![attachments/Pasted image 20220513002301.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220513002301.jpg)
+- Only one VPN connection to a VPC having 2 tunnels out of which only 1 is used (1.25 Gbps)
+
+## Share DX between multiple Accounts[¶](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/transit%20gateway/#share-dx-between-multiple-accounts "Permanent link")
+
+Share Transit Gateway across accounts using [Resource Access Manager (RAM)](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/Resource%20Access%20Manager%20(RAM)) connection between VPCs in the **same region but different accounts**
+
+![attachments/Pasted image 20220513003853.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220513003853.jpg)

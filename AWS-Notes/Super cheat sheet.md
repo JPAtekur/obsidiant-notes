@@ -712,3 +712,261 @@
 Share Transit Gateway across accounts using [Resource Access Manager (RAM)](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/Resource%20Access%20Manager%20(RAM)) connection between VPCs in the **same region but different accounts**
 
 ![attachments/Pasted image 20220513003853.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220513003853.jpg)
+
+
+### Simple Queue Service (SQS)
+- Unlimited number of messages in queue
+- Max 10 messages received per batch (configured using `MaxNumberOfMessages` parameter in the ReceiveMessage API)
+- **Max message size: 256KB**
+- **Default message retention: 4 days (max: 14 days)**
+- **Consumers could be EC2 instances or Lambda functions**
+* Standard Queue
+	- Unlimited throughput (publish any number of message per second into the queue)
+	- Low latency (<10 ms on publish and receive)
+	- Can have duplicate messages (at least once delivery)
+	- Can have out of order messages (best effort ordering)
+- FIFO Queue
+- Limited throughput
+    - 300 msg/s without batching (batch size = 1)
+    - 3000 msg/s with batching (batch size = 10)
+- **Message De-duplication**
+    - De-duplication interval: 5 min (duplicate messages will be discarded only if they are sent less than 5 mins apart)
+    - De-duplication methods:
+        - **Content-based de-duplication**: computes the hash of the message body and compares
+        - **Using a message de-duplication ID**: messages with the same de-duplication ID are considered duplicates
+- **Message Grouping**
+    - Group messages based on `MessageGroupID` to send them to different consumers
+    - Same value for `MessageGroupID`
+        - All the messages are in order
+        - Single consumer
+    - Different values for `MessageGroupID`
+        - Messages will be ordered for each group ID
+        - Ordering across groups is not guaranteed
+        - Each group ID can have a different consumer (parallel processing)
+        - Max number of consumers = number of unique group IDs
+* Access Management
+- **IAM Policies** to regulate access to the SQS API
+- **SQS Access Policies** (resource based policy)
+    - Used for cross-account access to SQS queues
+        - The example policy allows any resource in the account 111122223333 to poll the SQS queue for messages. ![attachments/Pasted image 20230220113656.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020230220113656.jpg)
+    - Used for allowing other AWS services to send messages to an SQS queue
+        - The example policy allows any AWS account to send messages to the queue as long as it is coming from the desired S3 bucket and the source account is the one owning the bucket. ![attachments/Pasted image 20230220113819.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020230220113819.jpg)
+* Dead Letter Queue (DLQ)
+	- An SQS queue used to store failing to be processed messages in another queue
+	- After the `MaximumReceives` threshold is exceeded, the message goes into the DLQ
+	- **Redrive to Source** - once the bug in the consumer has been resolved, messages in the DLQ can be sent back to the queue (original queue or a custom queue) for processing
+	- Prevents resource wastage
+	- Recommended to set a high retention period for DLQ (14 days)
+- Queue Delay
+	- Consumers see the message after some delay
+	- Default: 0 (Max: 15 min)
+	- Can be set at the queue level
+	- Can override the default queue delay for a specific message using the `DelaySeconds` parameter in the `SendMessage` API
+- Long Polling
+	- Poll the queue for longer
+	- Decreases the number of API calls made to SQS (**cheaper**)
+	- Reduces latency (incoming messages during the polling will be read instantaneously)
+	- **Polling time: 1 sec to 20 sec**
+	- Long Polling is preferred over Short Polling
+	- Can be enabled at the queue level or at the consumer level by using `WaitTimeSeconds` parameter in `ReceiveMessage` API.
+- Handling Priority
+> Use two SQS queues, one for low priority (ex. free) and the other for high priority (ex. paid). Configure your consuming application to only poll the low priority queue if the high priority queue is empty.
+
+
+### Simple Notification Service (SNS)
+- Used to broadcast messages
+- Pub-Sub model (publisher publishes messages to a topic, subscribers listen to the topic)
+- Instant message delivery (does not queue messages)
+* Access Management
+	- **lAM policies** to regulate access to the SNS API
+	- **SNS Access Policies** (resource based policy)
+	    - Used for cross-account access to SNS topics
+	    - Used for allowing other AWS services to publish to an SNS topic
+- Standard Topics
+	- Highest throughput
+	- At least once message delivery
+	- Best effort ordering
+	- Subscribers can be:
+	    - SQS queues
+	    - HTTP / HTTPS endpoints
+	    - Lambda functions
+	    - Emails (using SNS)
+	    - SMS & Mobile Notifications
+	    - Kinesis Data Firehose (KDF) to send the data into S3 or Redshift
+* FIFO Topics
+	- Guaranteed ordering of messages in that topic
+	- Publishing messages to a FIFO topic requires:
+	    - **Group ID**: messages will be ordered and grouped for each group ID
+	    - **Message deduplication ID**: for deduplication of messages
+	- **Can only have SQS FIFO queues as subscribers**
+	- **Limited throughput (same as SQS FIFO)** because only SQS FIFO queues can read from FIFO topics
+	- **The topic name must end with** `.fifo`
+* SNS + SQS Fanout Pattern
+	- Fully decoupled, no data loss
+	- SQS allows for: data persistence, delayed processing and retries of work
+	- Make sure your SQS queue access policy allows for SNS to write
+	- Diagram
+    - ![attachments/Pasted image 20220509205738.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220509205738.jpg)
+
+* Message Filtering
+	- JSON policy used to filter messages sent to SNS topic’s subscriptions
+	- Each subscriber will have its own filter policy (if a subscriber doesn’t have a filter policy, it receives every message)
+	- Ex: filter messages sent to each queue by the order status
+* SNS + Lambda + DLQ
+	- Lambda retries each failed message 3 times after which it is **sent to the DLQ by lambda**
+    - ![attachments/Pasted image 20220513220228.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220513220228.jpg)
+
+
+### Kinesis
+* Kinesis Data Stream (KDS)
+	- Real-time data streaming service
+	- **Used to ingest data in real time directly from source**
+	- **Capacity Modes**
+	    - Provisioned
+	        - Publishing: 1MB/sec per shard or 1000 msg/sec per shard
+	        - Consuming:
+	            - 2MB/sec per shard (throughput shared between all consumers)
+	            - **Enhanced Fanout**: 2MB/sec per shard per consumer (dedicated throughput for each consumer)
+	        - Throughput scales with shards (**manual scaling**)
+	        - Pay per shard provisioned per hour
+	    - On-demand
+	        - No need to provision or manage the capacity
+	        - Default capacity provisioned - 4 MB/sec or 4000 records/sec
+	        - Scales automatically based on observed throughput peak during the last 30 days
+	        - Pay per stream per hour & data in/out per GB
+	- **Not Serverless**
+	- **Data Retention: 1 day (default) to 365 days**
+	- A record consists of a **partition key** (used to partition data coming from multiple publishers) and data blob (**max 1MB**)
+	- Records will be ordered in each shard
+	- Producers use SDK, Kinesis Producer Library (KPL) or **Kinesis Agent** to publish records
+	- Consumers use SDK or Kinesis Client Library (KCL) to consume the records
+	- **Once data is inserted in Kinesis, it can’t be modified or deleted (immutability)**
+	- Ability to reprocess (replay) data
+	- Diagram
+    - ![attachments/Pasted image 20220509221100.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220509221100.jpg)
+
+* Kinesis Data Firehose (KDF)
+	- Used to load streaming data into a target location
+	- **Writes data in batches efficiently (near real time)**
+	    - Buffer size (size of the batch) - 1 MB to 128MB (default 5MB)
+	    - Buffer interval (how long to wait for buffer to fill up) - 60s to 900s (default 300s)
+	    - Greater the buffer size, higher the write efficiency, longer it will take to fill the buffer
+	- **Can ingest data in real time directly from source**
+	- **Auto-scaling**
+	- **Serverless**
+	- Destinations:
+	    - AWS: Redshift, S3, **OpenSearch**
+	    - 3rd party: Splunk, MongoDB, DataDog, NewRelic, etc.
+	    - Custom HTTP endpoint
+	- Pay for data going through Firehose (no provisioning)
+	- **Supports custom data transformation using Lambda functions**
+	- No replay capability (does not store data like KDS) ![attachments/Pasted image 20230221145737.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020230221145737.jpg)
+
+* Kinesis Data Analytics (KDA)
+	- Perform **real-time analytics on Kinesis streams using SQL**
+	- Creates streams from SQL query response
+	- **Cannot ingest data directly from source** (ingests data from KDS or KDF)
+	- **Auto-scaling**
+	- **Serverless**
+	- Pay for the data processed (no provisioning)
+	- Use cases:
+	    - Time-series analytics
+	    - Real-time dashboards
+	    - Real-time metrics
+- ![attachments/Pasted image 20230221151731.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020230221151731.jpg)
+
+* Kinesis Video Streams
+	- Capture, process and store video streams
+
+
+### Amazon MQ
+- If you have some traditional applications running from on-premise, they may use open protocols such as **MQTT, AMQP, STOMP, Openwire, WSS**, etc. When migrating to the cloud, instead of re-engineering the application to use SQS and SNS (AWS proprietary), we can use Amazon MQ (managed Apache ActiveMQ) for communication.
+- Doesn’t “scale” as much as SQS or SNS because it is provisioned
+- Runs on a dedicated machine (can run in HA with failover)
+- **Has both queue feature (SQS) and topic features (SNS)**
+
+* High Availability
+	- High Availability in Amazon MQ works by leveraging MQ broker in multi AZ (active and standby).
+	- EFS (NFS that can be mounted to multi AZ) is used to keep the files safe in case the main AZ is down. ![attachments/Pasted image 20220509223723.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020220509223723.jpg)
+
+### EventBridge
+- Extension of CloudWatch ⮕ Events
+- Event buses types:
+    - **Default event bus**: events from AWS services are sent to this
+    - **Partner event bus**: receive events from external SaaS applications
+    - **Custom Event bus**: for your own applications
+- Event Rules: how to process the events
+- **Event buses support cross-account access**
+- **Cron Jobs**: when creating an EB rule, we can select “Schedule” instead of event pattern to trigger an event based on a cron expression.
+- Can archive events (all or based on a filter) sent to an event bus to replay later
+
+> EventBridge is recommended for decoupling applications that reacts to events from third-party **SaaS** applications.
+
+* Schema Registry
+	- Defines how the data is structured in the event bus
+	- Schema can be versioned
+
+* Event Bus Policy
+	- Manage permissions for an event bus
+	- Useful to allow or deny events from another AWS account or region ![attachments/Pasted image 20230219100242.jpg](https://notes.arkalim.org/notes/aws%20solutions%20architect%20associate/attachments/Pasted%20image%2020230219100242.jpg)
+
+
+### Identity & Access Management (IAM)
+* Trust Policies
+	- Defines which principal entities (accounts, users, roles, federated users) can assume the role
+	- An IAM role is both an identity and a resource that supports resource-based policies.
+	- You must attach both a trust policy and an identity-based policy to an IAM role.
+	- The **IAM service supports only one type of resource-based policy** called a **role trust policy**, which is **attached to an IAM role**.
+- Protect IAM Accounts
+	- **Password Policy**
+	    - Used to enforce standards for password
+	        - password rotation
+	        - password reuse
+	    - Prevents **brute force** attack
+	- **Multi Factor Authentication (MFA)**
+	    - Both root user and IAM users should use MFA
+- Reporting Tools
+	- **Credentials Report**
+	    - lists all the users and the status of their credentials (MFA, password rotation, etc.)
+	    - **account level** - used to audit security for all the users
+	- **Access Advisor**
+	    - shows the service permissions granted to a user and when those services were last accessed
+	    - **user-level**
+	    - used to revise policies for a specific user
+* Permission Boundaries
+	- Set the maximum permissions an IAM entity can get
+	- **Can be applied to users and roles (not groups)**
+	- Used to ensure some users can’t escalate their privileges (make themselves admin)
+
+
+### Cognito
+Amazon Cognito lets you add user sign-up, sign-in, and access control to your web and mobile apps quickly and easily. Amazon Cognito scales to millions of users and supports sign-in with social identity providers, such as Apple, Facebook, Google, and Amazon, and enterprise identity providers via SAML 2.0 and OpenID Connect.
+
+* Cognito User Pools (CUP)
+	- **Serverless** identity provider (provides sign in functionality for app users)
+	- Sends back a JSON Web Token (used to verify the identity of the user)
+	- **MFA support**
+	- **Supports Federated Identities** allowing users to authenticate via third party identity provider like Facebook, Google, SAML, etc.
+	- Seamless integration with **API Gateway** & **ALB** for authentication
+
+* Cognito Identity Pools (CIP)
+	- Provides temporary credentials (using STS) to users so they can access AWS resources
+	- Integrates with CUP as an identity provider
+	- Example use case: provide **temporary access to write to an S3 bucket** after authenticating the user via FaceBook (using CUP identity federation)
+	    - Can't use S3 pre-signed URL as we need to provide access to a bucket location and not an single object
+
+
+### AWS Organizations
+- **Consolidated Billing** across all accounts (lower cost)
+- Pricing benefits from aggregated usage of AWS resources
+- API to automate AWS account creation (on demand account creation)
+- Establish Cross Account Roles for Admin purposes where the master account can assume an admin role in any of the children accounts
+* Service Control Policies (SCP)
+	- **Whitelist or blacklist IAM actions at the OU or Account level**
+	- **Does not apply to the Master Account**
+	- Applies to all the Users and Roles of the member accounts, including the root user. So, if something is restricted for that account, even the root user of that account won’t be able to do it.
+	- Must have an explicit allow (**does not allow anything by default**)
+	- **Does not apply to service-linked roles**
+	- **Explicit Deny** has the highest precedence
+
+### AWS Directory Services

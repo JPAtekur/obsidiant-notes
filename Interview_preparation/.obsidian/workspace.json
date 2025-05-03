@@ -1,0 +1,254 @@
+{
+  "main": {
+    "id": "b2224095f1557b39",
+    "type": "split",
+    "children": [
+      {
+        "id": "e113df77890c0828",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "b96503a948d7b05b",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Data structure/Data structure common questions.md",
+                "mode": "preview",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Data structure common questions"
+            }
+          },
+          {
+            "id": "818bb0bcc9b01a2d",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Common Behavioral.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Common Behavioral"
+            }
+          },
+          {
+            "id": "67fcdd544fa08ee1",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Project Related Questions.md",
+                "mode": "preview",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Project Related Questions"
+            }
+          },
+          {
+            "id": "dbdf338962eb44f6",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Work Time Line.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Work Time Line"
+            }
+          },
+          {
+            "id": "b304d8b895a97740",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Interview Preparation Topics.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Interview Preparation Topics"
+            }
+          },
+          {
+            "id": "10c51253f6683abe",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Java/Java 8+ features.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Java 8+ features"
+            }
+          }
+        ],
+        "currentTab": 5
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "8817a0f912d8dce4",
+    "type": "split",
+    "children": [
+      {
+        "id": "238b6c82278bf8ee",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "703127c61888b818",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "0bb1282e6029db13",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "4ab92c5cb40164b5",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "97087e6a01e9a9a8",
+    "type": "split",
+    "children": [
+      {
+        "id": "22435121810b38b7",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "89044061e724cc7c",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Data structure/Data structure common questions.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for Data structure common questions"
+            }
+          },
+          {
+            "id": "ad6813ba4dd7b966",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Data structure/Data structure common questions.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from Data structure common questions"
+            }
+          },
+          {
+            "id": "ea7318eaeae411cc",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "80f5bb47b62df4d9",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Data structure/Data structure common questions.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Data structure common questions"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "10c51253f6683abe",
+  "lastOpenFiles": [
+    "Interview Preparation Topics.md",
+    "Java/Java 8+ features.md",
+    "Java",
+    "Work Time Line.md",
+    "Project Related Questions.md",
+    "Common Behavioral.md",
+    "Data structure/Data structure common questions.md",
+    "20 Coding Patterns to master Tech in Interviews.pdf",
+    "Data structure"
+  ]
+}
